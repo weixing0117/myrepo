@@ -1,0 +1,135 @@
+
+package cn.com.comit.appointment.modules.wechat.test.msg;
+
+import java.rmi.RemoteException;
+import java.util.Date;
+import java.util.Random;
+import javax.xml.namespace.QName;
+import javax.xml.rpc.ParameterMode;
+import javax.xml.rpc.ServiceException;
+import org.apache.axis.client.Call;
+import org.apache.axis.client.Service;
+import org.apache.axis.encoding.XMLType;
+import cn.com.comit.appointment.common.utils.DateUtils;
+import cn.com.comit.appointment.modules.wechat.utils.CommonUtil;
+
+public class SendMessageTest {
+	//调用
+	public static void sendMessage( String[] str) {
+		String result="";
+	    String url = "接口地址(x.x.x.x)/服务名.asmx";  
+	    String namespace = "http://xxx.cn/";  
+	    String methodName = "方法名";  
+	    String soapActionURI = "http://xxx.cn/方法名";  
+	    Service service = new Service();  
+	    Call call;  
+	    try {  
+	        call = (Call) service.createCall();  
+
+	        call.setTargetEndpointAddress(url);  
+
+	        call.setUseSOAPAction(true);  
+
+	        call.setSOAPActionURI(soapActionURI);  
+
+	        call.setOperationName(new QName(namespace, methodName));  
+
+	        call.addParameter(new QName(namespace, "phone"), XMLType.XSD_STRING,ParameterMode.IN);
+
+	        call.addParameter(new QName(namespace, "content"), XMLType.XSD_STRING,ParameterMode.IN);
+
+	        call.setReturnType(XMLType.XSD_STRING);  
+
+	        //对传入的参数进行赋值操作
+	        String key=DESEncryption.toHexString(DESEncryption.encrypt(DateUtils.formatDateTime(new Date()),"tesecret"));
+
+	        System.out.println("key-->"+key);
+
+	        //开始调用服务
+	         result = (String) call.invoke(str);  
+
+	        System.out.println("result is-->"+result);  //对返回参数进行输出
+
+	    } catch (ServiceException e) {  
+
+	        e.printStackTrace();  
+
+		}catch(RemoteException e){
+
+			e.printStackTrace(); 
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		}
+
+	//封装参数
+	public static void sendParams(String phone,String content){
+		try {
+		String[] str = new String[3];  
+		  str[0] =phone; //手机号码
+	      str[1] =content;  //发送内容
+
+	      String key;
+
+		  key = DESEncryption.toHexString(DESEncryption.encrypt(DateUtils.formatDateTime(new Date()),"tesecret"));
+
+		  str[2]=key;
+
+		  sendMessage(str);
+
+		} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	}
+
+public static void main(String[] args) {
+
+	 StringBuilder code = new StringBuilder();  
+
+	 Random random = new Random();  
+     // 6位验证码  
+     for (int i = 0; i < 6; i++) {  
+         code.append(String.valueOf(random.nextInt(10)));  
+     }  
+	String content="正在核实您的用户信息，您的验证码是："+code.toString()+"   验证码5分钟内有效，如非本人操作请忽略";
+	sendParams("手机号码",content);
+}
+
+}
+
+
+POST /服务名.asmx HTTP/1.1 
+
+Host: 接口地址（x.x.x.x）(url :接口地址/服务名.asmx)
+
+Content-Type: text/xml; charset=utf-8
+
+Content-Length: length
+
+SOAPAction: "http://xxx.cn/方法名"
+
+ 
+
+<?xml version="1.0" encoding="utf-8"?>
+
+<soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+
+  <soap:Body>
+
+    <方法名 xmlns="http://xxx.cn/">(namespace :http://xxx.cn/)
+
+      <phone>string</phone>
+
+      <content>string</content>
+
+    </方法名>
+
+  </soap:Body>
+
+</soap:Envelope>
+
+ 
+
