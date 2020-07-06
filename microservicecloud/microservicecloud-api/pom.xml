@@ -20,7 +20,6 @@
 			<artifactId>spring-cloud-starter-feign</artifactId>
 		</dependency>
 		<dependency>
-
 	</dependencies>
 
 
